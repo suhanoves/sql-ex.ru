@@ -20,16 +20,16 @@
 -- [т.е. первичный ключ (пункт, дата)], написать запрос с выходными данными (пункт, дата, приход, расход).
 -- Использовать таблицы Income_o и Outcome_o.
 
-SELECT
-       COALESCE(i.point, o.point) point,
-       COALESCE(i.date, o.date) date,
-       i.inc inc,
-       o.out out
-FROM income_o i
-FULL JOIN outcome_o o
-    ON o.date = i.date
-    AND i.point = o.point
-ORDER BY point
+    SELECT
+           COALESCE(i.point, o.point) point,
+           COALESCE(i.date, o.date) date,
+           i.inc inc,
+           o.out out
+    FROM income_o i
+    FULL JOIN outcome_o o
+        ON o.date = i.date
+        AND i.point = o.point
+    ORDER BY point
 
 -- Задание: 30 (Serge I: 2003-02-14)
 -- https://sql-ex.ru/learn_exercises.php?LN=30
@@ -39,19 +39,19 @@ ORDER BY point
 -- Вывод: point, date, суммарный расход пункта за день (out), суммарный приход пункта за день (inc).
 -- Отсутствующие значения считать неопределенными (NULL).
 
-WITH pivot_table AS (
-    SELECT point, date, NULL out, inc
-    FROM Income
+    WITH pivot_table AS (
+        SELECT point, date, NULL out, inc
+        FROM Income
 
-    UNION ALL
+        UNION ALL
 
-    SELECT point, date, out, NULL
-    FROM Outcome
-    )
+        SELECT point, date, out, NULL
+        FROM Outcome
+        )
 
-SELECT point, date, SUM(out), SUM(inc)
-FROM pivot_table
-GROUP BY point, date
-ORDER BY point, date
+    SELECT point, date, SUM(out), SUM(inc)
+    FROM pivot_table
+    GROUP BY point, date
+    ORDER BY point, date
 
 
