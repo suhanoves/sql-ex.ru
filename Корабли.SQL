@@ -129,4 +129,23 @@ FROM Classes
 WHERE type = 'bc';
 
 
+-- Задание: 39 (Serge I: 2003-02-14)
+-- https://sql-ex.ru/learn_exercises.php?LN=39
+-- Найдите корабли, `сохранившиеся для будущих сражений`; т.е. выведенные из строя в одной битве (damaged),
+-- они участвовали в другой, произошедшей позже.
+
+WITH T AS
+         (SELECT *
+          FROM Outcomes o
+                   JOIN Battles b
+                        ON b.name = o.battle)
+
+SELECT DISTINCT ship
+FROM T
+WHERE EXISTS(
+              SELECT ship
+              FROM T as Tdam
+              WHERE T.ship = Tdam.ship
+                AND T.date > Tdam.date
+                AND Tdam.result = 'damaged');
 
