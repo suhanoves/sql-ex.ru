@@ -376,3 +376,22 @@ WHERE upper(model) NOT like '%[^A-Z]%'
    OR model NOT like '%[^0-9]%';
 
 
+-- Задание: 40 (Serge I: 2012-04-20)
+-- https://sql-ex.ru/learn_exercises.php?LN=40
+-- Найти производителей, которые выпускают более одной модели, при этом все выпускаемые производителем модели являются продуктами одного типа.
+-- Вывести: maker, type
+
+WITH T AS
+         (
+             SELECT maker, count(DISTINCT type) AS types, count(model) AS models
+             FROM product
+             GROUP BY maker
+         )
+
+SELECT DISTINCT T.maker, type
+FROM T
+         JOIN product
+              ON T.maker = product.maker
+WHERE types = 1
+  AND models > 1
+
