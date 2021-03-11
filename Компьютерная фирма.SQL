@@ -99,7 +99,180 @@ FROM (
 
          JOIN product p
               ON p.model = X.model
-WHERE maker = 'B'
+WHERE maker = 'B';
 
 
+-- Задание: 8 (Serge I: 2003-02-03)
+-- https://sql-ex.ru/learn_exercises.php?LN=8
+-- Найдите производителя, выпускающего ПК, но не ПК-блокноты.
 
+SELECT DISTINCT maker
+FROM Product
+WHERE type = 'PC'
+    EXCEPT
+SELECT DISTINCT maker
+FROM Product
+WHERE type = 'Laptop';
+
+
+-- Задание: 9 (Serge I: 2002-11-02)
+-- https://sql-ex.ru/learn_exercises.php?LN=9
+-- Найдите производителей ПК с процессором не менее 450 Мгц. Вывести: Maker
+
+SELECT DISTINCT maker
+FROM Product p,
+     PC
+WHERE p.model = pc.model
+  AND speed >= 450;
+
+
+-- Задание: 10 (Serge I: 2002-09-23)
+-- https://sql-ex.ru/learn_exercises.php?LN=10
+-- Найдите модели принтеров, имеющих самую высокую цену. Вывести: model, price
+
+SELECT model, price
+FROM printer
+WHERE price =
+      (SELECT MAX(price) FROM printer);
+
+
+-- Задание: 11 (Serge I: 2002-11-02)
+-- https://sql-ex.ru/learn_exercises.php?LN=11
+-- Найдите среднюю скорость ПК.
+
+SELECT AVG(speed)
+FROM PC;
+
+
+-- Задание: 12 (Serge I: 2002-11-02)
+-- https://sql-ex.ru/learn_exercises.php?LN=12
+-- Найдите среднюю скорость ПК-блокнотов, цена которых превышает 1000 дол.
+
+SELECT AVG(Speed)
+FROM Laptop
+WHERE Price > 1000;
+
+
+-- Задание: 13 (Serge I: 2002-11-02)
+-- https://sql-ex.ru/learn_exercises.php?LN=13
+-- Найдите среднюю скорость ПК, выпущенных производителем A.
+
+SELECT AVG(speed)
+FROM PC
+         JOIN product
+              ON product.model = PC.model AND product.maker = 'A';
+
+
+-- Задание: 15 (Serge I: 2003-02-03)
+-- https://sql-ex.ru/learn_exercises.php?LN=15
+-- Найдите размеры жестких дисков, совпадающих у двух и более PC. Вывести: HD
+
+SELECT hd
+FROM PC
+GROUP BY HD
+HAVING COUNT(HD) >= 2SELECT p.maker, AVG(l.screen)
+FROM Product p, Laptop l
+WHERE p.model = l.model
+GROUP BY p.maker;
+
+
+-- Задание: 16 (Serge I: 2003-02-03)
+-- https://sql-ex.ru/learn_exercises.php?LN=16
+-- Найдите пары моделей PC, имеющих одинаковые скорость и RAM. В результате каждая пара указывается только один раз,
+-- т.е. (i,j), но не (j,i), Порядок вывода: модель с большим номером, модель с меньшим номером, скорость и RAM.
+
+SELECT DISTINCT pc1.model, pc2.model, pc1.speed, pc1.ram
+FROM PC as pc1,
+     PC as pc2
+WHERE pc1.speed = pc2.speed
+  AND pc1.ram = pc2.ram
+  AND pc1.model > pc2.model;
+
+
+-- Задание: 17 (Serge I: 2003-02-03)
+-- https://sql-ex.ru/learn_exercises.php?LN=17
+-- Найдите модели ПК-блокнотов, скорость которых меньше скорости каждого из ПК.
+-- Вывести: type, model, speed
+
+SELECT DISTINCT 'Laptop' type, model, speed
+FROM Laptop
+WHERE speed < (SELECT MIN(speed) FROM PC);
+
+
+-- Задание: 18 (Serge I: 2003-02-03)
+-- https://sql-ex.ru/learn_exercises.php?LN=18
+-- Найдите производителей самых дешевых цветных принтеров. Вывести: maker, price
+
+
+SELECT DISTINCT pt.maker, pr.price
+FROM Product pt
+         JOIN Printer pr
+              ON pr.model = pt.model
+WHERE price = (SELECT MIN(price)
+               FROM Printer
+               WHERE color = 'y')
+  AND color = 'y';
+
+
+-- Задание: 19 (Serge I: 2003-02-13)
+-- https://sql-ex.ru/learn_exercises.php?LN=19
+-- Для каждого производителя, имеющего модели в таблице Laptop, найдите средний размер экрана выпускаемых
+-- им ПК-блокнотов. Вывести: maker, средний размер экрана.
+
+SELECT p.maker, AVG(l.screen)
+FROM Product p,
+     Laptop l
+WHERE p.model = l.model
+GROUP BY p.maker;
+
+-- Задание: 20 (Serge I: 2003-02-13)
+-- https://sql-ex.ru/learn_exercises.php?LN=20
+-- Найдите производителей, выпускающих по меньшей мере три различных модели ПК. Вывести: Maker, число моделей ПК.
+
+SELECT maker, COUNT(model)
+FROM Product
+WHERE type = 'PC'
+GROUP BY maker
+HAVING COUNT(model) >= 3;
+
+-- Задание: 21 (Serge I: 2003-02-13)
+-- https://sql-ex.ru/learn_exercises.php?LN=21
+-- Найдите максимальную цену ПК, выпускаемых каждым производителем, у которого есть модели в таблице PC.
+-- Вывести: maker, максимальная цена.
+
+SELECT p.maker, MAX(pc.price)
+FROM PC
+         JOIN Product p
+              ON p.model = pc.model
+GROUP BY p.maker;
+
+-- Задание: 22 (Serge I: 2003-02-13)
+-- https://sql-ex.ru/learn_exercises.php?LN=22
+-- Для каждого значения скорости ПК, превышающего 600 МГц, определите среднюю цену ПК с такой же скоростью.
+-- Вывести: speed, средняя цена.
+
+SELECT speed, AVG(price)
+FROM PC
+WHERE speed > 600
+GROUP BY speed;
+
+
+-- Задание: 23 (Serge I: 2003-02-14)
+-- https://sql-ex.ru/learn_exercises.php?LN=23
+-- Найдите производителей, которые производили бы как ПК
+-- со скоростью не менее 750 МГц, так и ПК-блокноты со скоростью не менее 750 МГц.
+-- Вывести: Maker
+
+SELECT DISTINCT p1.maker
+FROM PC
+         JOIN Product p1
+              ON p1.model = PC.model
+WHERE pc.speed >= 750
+
+INTERSECT
+
+SELECT DISTINCT p2.maker
+FROM Laptop l
+         JOIN Product p2
+              ON p2.model = l.model
+WHERE l.speed >= 750
