@@ -27,7 +27,7 @@ SELECT s.class, s.name, c.country
 FROM Ships s
          JOIN Classes c
               ON s.class = c.class
-WHERE c.numGuns >= 10
+WHERE c.numGuns >= 10;
 
 
 -- Задание: 31 (Serge I: 2002-10-22)
@@ -36,4 +36,51 @@ WHERE c.numGuns >= 10
 
 SELECT class, country
 FROM classes
-WHERE bore >= 16
+WHERE bore >= 16;
+
+
+-- Задание: 32 (Serge I: 2003-02-17)
+-- https://sql-ex.ru/learn_exercises.php?LN=32
+-- Одной из характеристик корабля является половина куба калибра его главных орудий (mw). С точностью
+-- до 2 десятичных знаков определите среднее значение mw для кораблей каждой страны,
+-- у которой есть корабли в базе данных.
+
+
+SELECT country, CAST(AVG(mw) AS NUMERIC(6, 2)) as mw
+FROM (
+         SELECT c.country, ship, POWER(bore, 3) / 2 as mw
+         FROM Outcomes O
+                  JOIN Classes c ON o.ship = c.class
+
+         UNION
+
+         SELECT c.country, name, POWER(bore, 3) / 2 as mw
+         FROM ships s
+                  JOIN Classes c ON c.class = s.class
+     ) AllShips
+GROUP BY country;
+
+
+-- Задание: 33 (Serge I: 2002-11-02)
+-- https://sql-ex.ru/learn_exercises.php?LN=33
+-- Укажите корабли, потопленные в сражениях в Северной Атлантике (North Atlantic). Вывод: ship.
+
+SELECT ship
+FROM Outcomes
+WHERE result = 'sunk'
+  AND battle = 'North Atlantic';
+
+
+-- Задание: 34 (Serge I: 2002-11-04)
+-- https://sql-ex.ru/learn_exercises.php?LN=34
+-- По Вашингтонскому международному договору от начала 1922 г. запрещалось строить линейные корабли водоизмещением
+-- более 35 тыс.тонн. Укажите корабли, нарушившие этот договор (учитывать только корабли c известным годом
+-- спуска на воду). Вывести названия кораблей.
+
+SELECT name
+FROM Ships s
+         JOIN Classes c
+              ON c.class = s.class
+WHERE s.launched > 1921
+  AND c.displacement > 35000
+  AND type = 'bb';
