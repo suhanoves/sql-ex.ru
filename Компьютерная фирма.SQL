@@ -275,4 +275,92 @@ SELECT DISTINCT p2.maker
 FROM Laptop l
          JOIN Product p2
               ON p2.model = l.model
-WHERE l.speed >= 750
+WHERE l.speed >= 750;
+
+
+-- Задание: 24 (Serge I: 2003-02-03)
+-- https://sql-ex.ru/learn_exercises.php?LN=24
+-- Перечислите номера моделей любых типов, имеющих самую высокую цену по всей имеющейся в базе данных продукции.
+
+WITH Total AS
+         (
+             SELECT model, price
+             FROM PC
+
+             UNION ALL
+
+             SELECT model, price
+             FROM Laptop
+
+             UNION ALL
+
+             SELECT model, price
+             FROM Printer
+         )
+
+SELECT DISTINCT model
+FROM Total
+WHERE price = (SELECT MAX(price) from Total);
+
+
+-- Задание: 25 (Serge I: 2003-02-14)
+-- https://sql-ex.ru/learn_exercises.php?LN=25
+-- Найдите производителей принтеров, которые производят ПК с наименьшим объемом RAM и с самым быстрым процессором
+-- среди всех ПК, имеющих наименьший объем RAM. Вывести: Maker
+
+WITH Low_ram AS
+         (SELECT DISTINCT model, speed, ram
+          FROM PC
+          WHERE ram = (SELECT MIN(ram) FROM PC)
+         )
+
+SELECT DISTINCT maker
+FROM Product
+WHERE model in
+      (SELECT model
+       FROM Low_ram
+       WHERE speed = (SELECT MAX(Speed) from Low_ram))
+  AND maker IN (SELECT maker FROM Product where type = 'Printer');
+
+
+-- Задание: 26 (Serge I: 2003-02-14)
+-- https://sql-ex.ru/learn_exercises.php?LN=26
+-- Найдите среднюю цену ПК и ПК-блокнотов, выпущенных производителем A (латинская буква).
+-- Вывести: одна общая средняя цена.
+
+SELECT AVG(price)
+FROM (
+         SELECT model, price
+         FROM PC
+
+         UNION ALL
+
+         SELECT model, price
+         FROM Laptop
+     ) AS PCL
+         JOIN product AS p
+              ON PCL.model = p.model
+WHERE maker = 'A';
+
+
+-- Задание: 27 (Serge I: 2003-02-03)
+-- https://sql-ex.ru/learn_exercises.php?LN=27
+-- Найдите средний размер диска ПК каждого из тех производителей, которые выпускают и принтеры.
+-- Вывести: maker, средний размер HD.
+
+SELECT maker, AVG(hd)
+FROM Product p
+         JOIN PC
+              ON pc.model = p.model
+WHERE p.maker in (SELECT maker FROM Product WHERE Type = 'printer')
+GROUP BY maker
+
+
+-- Задание: 28 (Serge I: 2012-05-04)
+-- Используя таблицу Product, определить количество производителей, выпускающих по одной модели.
+
+SELECT COUNT(*)
+FROM (SELECT maker
+      FROM Product
+      GROUP BY maker
+      HAVING COUNT(model) = 1) z

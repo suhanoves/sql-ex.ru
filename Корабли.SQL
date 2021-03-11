@@ -28,3 +28,12 @@ FROM Ships s
          JOIN Classes c
               ON s.class = c.class
 WHERE c.numGuns >= 10
+
+
+-- Задание: 31 (Serge I: 2002-10-22)
+-- https://sql-ex.ru/learn_exercises.php?LN=31
+-- Для классов кораблей, калибр орудий которых не менее 16 дюймов, укажите класс и страну.
+
+SELECT class, country
+FROM classes
+WHERE bore >= 16
