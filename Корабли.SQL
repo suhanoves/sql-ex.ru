@@ -45,7 +45,6 @@ WHERE bore >= 16;
 -- до 2 десятичных знаков определите среднее значение mw для кораблей каждой страны,
 -- у которой есть корабли в базе данных.
 
-
 SELECT country, CAST(AVG(mw) AS NUMERIC(6, 2)) as mw
 FROM (
          SELECT c.country, ship, POWER(bore, 3) / 2 as mw
@@ -84,3 +83,50 @@ FROM Ships s
 WHERE s.launched > 1921
   AND c.displacement > 35000
   AND type = 'bb';
+
+
+-- Задание: 36 (Serge I: 2003-02-17)
+-- https://sql-ex.ru/learn_exercises.php?LN=36
+-- Перечислите названия головных кораблей, имеющихся в базе данных (учесть корабли в Outcomes).
+
+SELECT class
+FROM classes
+WHERE class IN (SELECT name FROM ships)
+   OR class IN (SELECT ship FROM outcomes);
+
+
+-- Задание: 37 (Serge I: 2003-02-17)
+-- https://sql-ex.ru/learn_exercises.php#answer_ref
+-- Найдите классы, в которые входит только один корабль из базы данных (учесть также корабли в Outcomes).
+
+SELECT class
+FROM (
+         SELECT ship as name, class
+         FROM Outcomes,
+              Classes
+         WHERE ship = class
+         UNION
+         SELECT name, class
+         FROM Ships
+     ) t
+Group by class
+HAVING count(*) = 1;
+
+
+-- Задание: 38 (Serge I: 2003-02-19)
+-- https://sql-ex.ru/learn_exercises.php?LN=38
+-- Найдите страны, имевшие когда-либо классы обычных боевых кораблей ('bb')
+-- и имевшие когда-либо классы крейсеров ('bc').
+
+SELECT DISTINCT country
+FROM Classes
+WHERE type = 'bb'
+
+INTERSECT
+
+SELECT DISTINCT country
+FROM Classes
+WHERE type = 'bc';
+
+
+
