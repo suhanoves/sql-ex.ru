@@ -353,7 +353,7 @@ FROM Product p
          JOIN PC
               ON pc.model = p.model
 WHERE p.maker in (SELECT maker FROM Product WHERE Type = 'printer')
-GROUP BY maker
+GROUP BY maker;
 
 
 -- Задание: 28 (Serge I: 2012-05-04)
@@ -363,4 +363,16 @@ SELECT COUNT(*)
 FROM (SELECT maker
       FROM Product
       GROUP BY maker
-      HAVING COUNT(model) = 1) z
+      HAVING COUNT(model) = 1) z;
+
+
+-- Задание: 35 (qwrqwr: 2012-11-23)
+-- В таблице Product найти модели, которые состоят только из цифр или только из латинских букв
+-- (A-Z, без учета регистра). Вывод: номер модели, тип модели.
+
+SELECT model, type
+FROM product
+WHERE upper(model) NOT like '%[^A-Z]%'
+   OR model NOT like '%[^0-9]%';
+
+
