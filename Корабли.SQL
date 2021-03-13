@@ -149,3 +149,68 @@ WHERE EXISTS(
                 AND T.date > Tdam.date
                 AND Tdam.result = 'damaged');
 
+
+-- Задание: 42 (Serge I: 2002-11-05)
+-- https://sql-ex.ru/learn_exercises.php?LN=42
+-- Найдите названия кораблей, потопленных в сражениях, и название сражения, в котором они были потоплены.
+
+SELECT ship, battle
+FROM Outcomes
+WHERE result = 'sunk';
+
+
+-- Задание: 43 (qwrqwr: 2011-10-28)
+-- https://sql-ex.ru/learn_exercises.php?LN=43
+-- Укажите сражения, которые произошли в годы, не совпадающие ни с одним из годов спуска кораблей на воду.
+
+SELECT DISTINCT name AS battle
+FROM battles
+WHERE YEAR(date) NOT IN
+      (SELECT launched
+       FROM ships
+       WHERE launched IS NOT NULL);
+
+
+-- Задание: 44 (Serge I: 2002-12-04)
+-- https://sql-ex.ru/learn_exercises.php?LN=44
+-- Найдите названия всех кораблей в базе данных, начинающихся с буквы R.
+
+SELECT a.name
+FROM (
+         SELECT name
+         FROM Ships
+         UNION
+         SELECT ship as name
+         FROM Outcomes
+     ) a
+WHERE a.name LIKE 'R%';
+
+
+-- Задание: 45 (Serge I: 2002-12-04)
+-- https://sql-ex.ru/learn_exercises.php?LN=45
+-- Найдите названия всех кораблей в базе данных, состоящие из трех и более слов (например, King George V).
+-- Считать, что слова в названиях разделяются единичными пробелами, и нет концевых пробелов.
+
+SELECT name
+FROM Ships
+WHERE name like '% % %'
+
+UNION
+
+SELECT ship
+FROM Outcomes
+WHERE ship like '% % %';
+
+
+-- Задание: 46 (Serge I: 2003-02-14)
+-- https://sql-ex.ru/learn_exercises.php?LN=47
+-- Для каждого корабля, участвовавшего в сражении при Гвадалканале (Guadalcanal)
+-- Вывести название, водоизмещение и число орудий.
+
+SELECT O.ship, C.displacement, C.numGuns
+FROM Outcomes O
+         LEFT JOIN Ships S
+                   ON O.ship = S.name
+         LEFT JOIN Classes C
+                   ON C.class = COALESCE(S.class, O.ship)
+WHERE battle = 'Guadalcanal';
