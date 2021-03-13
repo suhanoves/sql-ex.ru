@@ -393,5 +393,36 @@ FROM T
          JOIN product
               ON T.maker = product.maker
 WHERE types = 1
-  AND models > 1
+  AND models > 1;
 
+
+-- Задание: 41 (Serge I: 2019-05-31)
+-- https://sql-ex.ru/learn_exercises.php?LN=41
+-- Для каждого производителя, у которого присутствуют модели хотя бы в одной из таблиц PC, Laptop или Printer,
+-- определить максимальную цену на его продукцию.
+-- Вывод: имя производителя, если среди цен на продукцию данного производителя присутствует NULL,
+-- то выводить для этого производителя NULL, иначе максимальную цену.
+
+WITH T AS
+         (SELECT P.maker, M.price
+          FROM (
+                   SELECT model, price
+                   FROM PC
+                   UNION ALL
+                   SELECT model, price
+                   FROM Laptop
+                   UNION ALL
+                   SELECT model, price
+                   FROM Printer) AS M
+                   JOIN Product P
+                        ON M.model = P.model
+         )
+
+SELECT maker,
+       (CASE
+            WHEN COUNT(price) < COUNT(*)
+                THEN NULL
+            ELSE MAX(price)
+           END) AS price
+FROM T
+GROUP BY maker
