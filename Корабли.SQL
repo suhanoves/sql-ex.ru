@@ -214,3 +214,39 @@ FROM Outcomes O
          LEFT JOIN Classes C
                    ON C.class = COALESCE(S.class, O.ship)
 WHERE battle = 'Guadalcanal';
+
+
+-- Задание: 47 (Serge I: 2019-06-07)
+-- https://sql-ex.ru/learn_exercises.php?LN=47
+-- Определить страны, которые потеряли в сражениях все свои корабли.
+
+
+-- Задание: 48 (Serge I: 2003-02-16)
+-- https://sql-ex.ru/learn_exercises.php?LN=48
+-- Найдите классы кораблей, в которых хотя бы один корабль был потоплен в сражении.
+
+SELECT Ships.class
+FROM Ships,
+     Outcomes
+WHERE Outcomes.ship = Ships.name
+  AND Outcomes.result = 'sunk'
+UNION
+SELECT Classes.class
+FROM Classes,
+     Outcomes
+WHERE Outcomes.ship = Classes.class
+  AND Outcomes.result = 'sunk';
+
+
+
+-- Задание: 49 (Serge I: 2003-02-17)
+-- https://sql-ex.ru/learn_exercises.php?LN=49
+-- Найдите названия кораблей с орудиями калибра 16 дюймов (учесть корабли из таблицы Outcomes).
+
+SELECT DISTINCT COALESCE(s.name, o.ship) as name
+FROM Ships S
+         FULL JOIN Outcomes O
+                   ON S.name = O.ship
+         LEFT JOIN Classes C
+                   ON C.class = COALESCE(S.class, O.ship)
+WHERE C.bore = 16;
