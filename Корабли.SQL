@@ -225,18 +225,11 @@ WHERE battle = 'Guadalcanal';
 -- https://sql-ex.ru/learn_exercises.php?LN=48
 -- Найдите классы кораблей, в которых хотя бы один корабль был потоплен в сражении.
 
-SELECT Ships.class
-FROM Ships,
-     Outcomes
-WHERE Outcomes.ship = Ships.name
-  AND Outcomes.result = 'sunk'
-UNION
-SELECT Classes.class
-FROM Classes,
-     Outcomes
-WHERE Outcomes.ship = Classes.class
-  AND Outcomes.result = 'sunk';
-
+SELECT DISTINCT COALESCE(s.class, ship) as class
+FROM outcomes o
+         LEFT JOIN ships s ON o.ship = s.name
+         INNER JOIN classes c ON c.class = COALESCE(s.class, ship)
+WHERE o.result = 'sunk';
 
 
 -- Задание: 49 (Serge I: 2003-02-17)
@@ -250,3 +243,29 @@ FROM Ships S
          LEFT JOIN Classes C
                    ON C.class = COALESCE(S.class, O.ship)
 WHERE C.bore = 16;
+
+
+-- Задание: 50 (Serge I: 2002-11-05)
+-- https://sql-ex.ru/learn_exercises.php?LN=50
+-- Найдите сражения, в которых участвовали корабли класса Kongo из таблицы Ships.
+
+SELECT DISTINCT battle
+FROM Outcomes O
+         LEFT JOIN Ships S
+                   ON O.ship = S.name
+WHERE COALESCE(S.class, O.ship) = 'Kongo';
+
+
+-- Задание: 52 (qwrqwr: 2010-04-23)
+-- https://sql-ex.ru/learn_exercises.php?LN=50
+-- Определить названия всех кораблей из таблицы Ships, которые могут быть линейным японским кораблем,
+-- имеющим число главных орудий не менее девяти, калибр орудий менее 19 дюймов и водоизмещение не более 65 тыс.тонн
+
+SELECT S.name
+FROM Ships S
+         JOIN Classes C ON S.class = C.class
+WHERE country = 'Japan'
+  AND type = 'bb'
+  AND Coalesce(numGuns, 9) > = 9
+  AND Coalesce(bore, 0.0) < 19.0
+  AND Coalesce(displacement, 0) <= 65000
