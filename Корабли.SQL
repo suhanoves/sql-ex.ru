@@ -257,7 +257,7 @@ WHERE COALESCE(S.class, O.ship) = 'Kongo';
 
 
 -- Задание: 52 (qwrqwr: 2010-04-23)
--- https://sql-ex.ru/learn_exercises.php?LN=50
+-- https://sql-ex.ru/learn_exercises.php?LN=52
 -- Определить названия всех кораблей из таблицы Ships, которые могут быть линейным японским кораблем,
 -- имеющим число главных орудий не менее девяти, калибр орудий менее 19 дюймов и водоизмещение не более 65 тыс.тонн
 
@@ -268,4 +268,33 @@ WHERE country = 'Japan'
   AND type = 'bb'
   AND Coalesce(numGuns, 9) > = 9
   AND Coalesce(bore, 0.0) < 19.0
-  AND Coalesce(displacement, 0) <= 65000
+  AND Coalesce(displacement, 0) <= 65000;
+
+
+-- Задание: 53 (Serge I: 2002-11-05)
+-- https://sql-ex.ru/learn_exercises.php?LN=53
+-- Определите среднее число орудий для классов линейных кораблей.
+-- Получить результат с точностью до 2-х десятичных знаков.
+
+SELECT CAST(AVG(numGuns * 1.0) AS NUMERIC(6, 2)) as numGuns
+FROM Classes
+WHERE TYPE = 'bb';
+
+-- Задание: 54 (Serge I: 2003-02-14)
+-- https://sql-ex.ru/learn_exercises.php?LN=53
+-- С точностью до 2-х десятичных знаков определите среднее число орудий всех линейных кораблей
+-- (учесть корабли из таблицы Outcomes).
+
+WITH T AS
+         (SELECT DISTINCT COALESCE(S.name, O.ship)  Name,
+                          COALESCE(S.class, O.ship) Class,
+                          NumGuns
+          FROM Ships S
+                   FULL JOIN Outcomes O
+                             ON S.name = O.ship
+                   JOIN Classes C
+                        ON C.class = COALESCE(S.class, O.ship)
+          WHERE type = 'bb')
+
+SELECT CAST(AVG(NumGuns * 1.0) AS NUMERIC(6, 2))
+FROM T
