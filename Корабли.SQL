@@ -255,6 +255,37 @@ FROM Outcomes O
                    ON O.ship = S.name
 WHERE COALESCE(S.class, O.ship) = 'Kongo';
 
+    -- Задание: 51 (Serge I: 2003-02-17)
+-- https://sql-ex.ru/learn_exercises.php?LN=51
+-- Найдите названия кораблей, имеющих наибольшее число орудий среди всех имеющихся кораблей такого же водоизмещения
+-- (учесть корабли из таблицы Outcomes).
+
+WITH T AS
+         (SELECT S.name, S.class
+          FROM Ships S
+          UNION
+          SELECT O.ship, O.ship
+          FROM Outcomes O
+          WHERE O.ship NOT IN (SELECT name FROM Ships)),
+
+     X AS (
+         SELECT name, T.class, numGuns, displacement
+         FROM T
+                  JOIN Classes C
+                       ON T.class = C.class),
+
+     Y AS (
+         SELECT displacement, MAX(numGuns) numGuns
+         FROM X
+         GROUP BY displacement)
+
+SELECT X.name
+FROM X,
+     Y
+WHERE X.displacement = Y.displacement
+  AND X.numGuns = Y.numGuns
+
+
 
 -- Задание: 52 (qwrqwr: 2010-04-23)
 -- https://sql-ex.ru/learn_exercises.php?LN=52
@@ -298,3 +329,34 @@ WITH T AS
 
 SELECT CAST(AVG(NumGuns * 1.0) AS NUMERIC(6, 2))
 FROM T
+
+
+-- Задание: 55 (Serge I: 2003-02-16)
+-- https://sql-ex.ru/learn_exercises.php?LN=55
+-- Для каждого класса определите год, когда был спущен на воду первый корабль этого класса. Если год спуска на воду
+-- головного корабля неизвестен, определите минимальный год спуска на воду кораблей этого класса. Вывести: класс, год.
+
+SELECT C.class, MIN(S.launched)
+FROM Classes C
+         LEFT JOIN Ships S
+                   ON S.class = C.class
+GROUP BY C.class;
+
+-- Задание: 56 (Serge I: 2003-02-16)
+-- Для каждого класса определите число кораблей этого класса, потопленных в сражениях.
+-- Вывести: класс и число потопленных кораблей.
+
+WITH T AS
+         (SELECT DISTINCT COALESCE(S.class, O.ship) class,
+                          count(result)             result
+          FROM Outcomes O
+                   LEFT JOIN Ships S
+                             ON S.name = O.ship
+          WHERE result = 'sunk'
+          GROUP BY COALESCE(S.class, O.ship)
+         )
+
+SELECT DISTINCT C.class, COALESCE(T.result, 0)
+FROM Classes C
+         LEFT JOIN T
+                   ON T.class = C.class;
