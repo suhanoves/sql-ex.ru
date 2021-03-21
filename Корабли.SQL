@@ -255,36 +255,42 @@ FROM Outcomes O
                    ON O.ship = S.name
 WHERE COALESCE(S.class, O.ship) = 'Kongo';
 
-    -- Задание: 51 (Serge I: 2003-02-17)
+-- Задание: 51 (Serge I: 2003-02-17)
 -- https://sql-ex.ru/learn_exercises.php?LN=51
 -- Найдите названия кораблей, имеющих наибольшее число орудий среди всех имеющихся кораблей такого же водоизмещения
 -- (учесть корабли из таблицы Outcomes).
 
+-- Вариант 1
 WITH T AS
-         (SELECT S.name, S.class
+         (SELECT S.name, C.numguns, C.displacement
           FROM Ships S
+                   JOIN Classes C ON C.class = S.class
           UNION
-          SELECT O.ship, O.ship
+          SELECT O.ship, C.numguns, C.displacement
           FROM Outcomes O
-          WHERE O.ship NOT IN (SELECT name FROM Ships)),
+                   JOIN Classes C ON C.class = O.ship)
+SELECT T1.name
+FROM T T1
+         JOIN (SELECT displacement, MAX(numguns) numguns
+               FROM T
+               GROUP BY displacement) T2 ON T1.displacement = T2.displacement
+WHERE T1.numguns = T2.numguns;
 
-     X AS (
-         SELECT name, T.class, numGuns, displacement
-         FROM T
-                  JOIN Classes C
-                       ON T.class = C.class),
+-- Вариант 2
+WITH T AS
+         (SELECT S.name, C.numguns, C.displacement
+          FROM Ships S,
+               Classes C
+          WHERE S.class = C.class
+          UNION
+          SELECT O.ship, C.numguns, C.displacement
+          FROM Outcomes O,
+               Classes C
+          WHERE O.ship = C.class)
 
-     Y AS (
-         SELECT displacement, MAX(numGuns) numGuns
-         FROM X
-         GROUP BY displacement)
-
-SELECT X.name
-FROM X,
-     Y
-WHERE X.displacement = Y.displacement
-  AND X.numGuns = Y.numGuns
-
+SELECT T1.name
+FROM T T1
+WHERE numguns >= ALL (SELECT numguns FROM T AS T2 WHERE T1.displacement = T2.displacement);
 
 
 -- Задание: 52 (qwrqwr: 2010-04-23)
